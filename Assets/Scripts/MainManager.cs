@@ -1,31 +1,45 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainManager : MonoBehaviour
 {
+    public static MainManager Instance;
+
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+    public Text Name;
+
+
+
     private bool m_Started = false;
-    private int m_Points;
-    
+    private int m_Points = 0;
+    private int m_HighScore = 0;
+    private string m_HighScorePlayer;
+    private string m_PlayerName;
+
+
     private bool m_GameOver = false;
 
-    
+    private void Awake()
+    {
+        Instance = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
+        m_PlayerName = SecondaryManager.secondarymanager.playerText;
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -36,6 +50,10 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        LoadPoints();
+        Name.text = $"Best Score : {m_HighScorePlayer} : {m_HighScore}";
+
     }
 
     private void Update()
@@ -60,6 +78,7 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+        Debug.Log(Application.persistentDataPath);
     }
 
     void AddPoint(int point)
@@ -71,6 +90,46 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
+        if(m_Points > m_HighScore)
+        {
+            m_HighScore = m_Points;
+            m_HighScorePlayer = m_PlayerName;
+            SavePoints();
+        }
         GameOverText.SetActive(true);
     }
+
+    [System.Serializable]
+
+    public class SaveData
+    {
+        public int highscore;
+        public string highscoreplayer;
+    }
+
+    public void SavePoints()
+    {
+        SaveData data = new SaveData();
+        data.highscore = m_HighScore;
+        data.highscoreplayer = m_HighScorePlayer;
+
+        string json = JsonUtility.ToJson(data);
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+
+    }
+
+    public void LoadPoints()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            m_HighScore = data.highscore;
+            m_HighScorePlayer = data.highscoreplayer;
+        }
+    }
 }
+
+    
