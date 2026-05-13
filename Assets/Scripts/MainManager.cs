@@ -78,7 +78,7 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
-        Debug.Log(Application.persistentDataPath);
+        
     }
 
     void AddPoint(int point)

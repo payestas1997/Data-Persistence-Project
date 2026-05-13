@@ -30,7 +30,7 @@ public class SecondaryManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        Debug.Log(Application.persistentDataPath);
+       
     }
 
  
