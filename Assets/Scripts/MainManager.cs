@@ -56,6 +56,10 @@ public class MainManager : MonoBehaviour
 
     }
 
+    public void ExitMain()
+    {
+        SceneManager.LoadScene(0);
+    }
     private void Update()
     {
         if (!m_Started)
